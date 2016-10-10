@@ -1,0 +1,108 @@
+<html>
+<head>
+  <title>Test Vuejs</title>
+  <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="panel-body" id="app">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th style="width: 20px;">No.</th>
+            <th style="width: 130px;">Category</th>
+            <th style="width: 130px;">Subcategory</th>
+          </tr>
+        </thead>
+        <tbody>
+          <button class="btn btn-primary btn-xs" @click="addRow(rows.length-1)">add row</button>
+          <tr v-for="row in rows" track-by="$index">
+            <td>
+              {{ $index +1 }}
+            </td>
+            <td>
+              <select v-model="row.selectedCategory" id="category">
+                <option v-for="category in categories" v-bind:value="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+            </td>
+            <td>
+              <select v-model="row.selectedSubCategory" id="subcategory">
+                <option v-for="item in subcategories | filterBy row.selectedCategory in 'category_id'" v-bind:value="item.id">
+                  {{ item.name }}
+                </option>
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-primary btn-xs" @click="addRow($index)">add row</button>
+              <button class="btn btn-danger btn-xs" @click="removeRow($index)">remove row</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <button @click="postData()">SUBMIT DATA</button>
+      <pre>{{ $data | json }}</pre>
+      <pre></pre>
+    </div>
+  </div>
+
+  <!--javascript-->
+  <script src="jquery.min.js" type="text/javascript"></script>
+  <script src="vue.js" type="text/javascript"></script>
+  <script src="vue-resource.js" type="text/javascript"></script>
+
+  <script>
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      rows: [],
+      categories: [],
+      subcategories: []
+    },
+    ready: function() {
+      this.initCategories();
+    },
+    methods: {
+      addRow: function (index) {
+        try {
+          this.rows.splice(index + 1, 0, {});
+        } catch(e)
+        {
+          console.log(e);
+        }
+      },
+      removeRow: function (index) {
+        this.rows.splice(index, 1);
+      },
+      initCategories: function() {
+        // GET /someUrl
+        this.$http.get('get_categories.php').then((response) => {
+          // success callback
+          this.$set('categories', response.data.categories)
+        }, (response) => {
+          // error callback
+        });
+        this.$http.get('get_sub_categories.php').then((response) => {
+          // success callback
+          this.$set('subcategories', response.data.subcategories)
+        }, (response) => {
+          // error callback
+        });
+      },
+      postData: function () {
+        $.ajax({
+          context: this,
+          type: "POST",
+          data: '{ "csc": '+JSON.stringify(this.rows)+', "sender": [{"nama" : "Admin"}]}',
+		  success: function(jsonData) {
+			alert(jsonData.message+', code: '+jsonData.status_code);
+		  },
+          url: "hasil.php"
+        });
+      }
+    }
+  });
+  </script>
+</body>
+</html>
