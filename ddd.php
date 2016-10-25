@@ -9,7 +9,7 @@
       <table class="table table-hover">
         <thead>
           <tr>
-            <th style="width: 20px;">No. Urut</th>
+            <th style="width: 20px;">No</th>
             <th style="width: 130px;">Category</th>
             <th style="width: 130px;">Subcategory</th>
           </tr>
