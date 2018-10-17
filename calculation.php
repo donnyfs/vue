@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>Dynamic Table with Vuejs</title>
-  <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
 </head>
 <body>
   <div class="container">
@@ -74,17 +74,17 @@
             </tr>
           </tfoot>
         </table>
-        <button @click="getData()">SUBMIT DATA</button>
-        <pre>{{ $data | json }}</pre>
+        <button class="btn btn-success" @click="postData()">SUBMIT DATA</button>
+        <pre>{{ $data.rows | json }}</pre>
       </div>
   </div>
 
   <!--javascript-->
-  <script src="jquery.min.js" type="text/javascript"></script>
-  <script src="Sortable.min.js" type="text/javascript"></script>
-  <script src="vue.js" type="text/javascript"></script>
-  <script src="vue-resource.js" type="text/javascript"></script>
-  <script src="accounting.min.js" type="text/javascript"></script>
+  <script src="assets/jquery.min.js" type="text/javascript"></script>
+  <script src="assets/accounting.min.js" type="text/javascript"></script>
+  <script src="assets/Sortable.min.js" type="text/javascript"></script>
+  <script src="assets/vue.js" type="text/javascript"></script>
+  <script src="assets/vue-resource.js" type="text/javascript"></script>
   <script>
   Vue.filter('currencyDisplay', {
     // model -> view
@@ -166,18 +166,18 @@
       removeRow: function (index) {
         this.rows.splice(index, 1);
       },
-      getData: function () {
+      postData: function () {
         $.ajax({
           context: this,
           type: "POST",
-          data: {
-            rows: this.rows,
-            total: this.total,
-            delivery: this.delivery,
-            taxtotal: this.taxtotal,
-            grandtotal: this.grandtotal,
-          },
-          url: "/api/data"
+          data: '{ "rows": '+JSON.stringify(this.rows)+', "sender": [{"nama" : "Admin"}]}',
+		  success: function(jsonData) {
+			alert('Status: ' + jsonData.message + ', code: ' + jsonData.status_code);
+		  },
+			error: function(jsonData, textStatus, errorThrown) { 
+				alert('Status: ' + textStatus + ', "' + errorThrown + '"' + ', code: ' + jsonData.status); 
+			}, 
+			url: "action/store_calculation.php"
         });
       }
     }

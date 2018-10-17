@@ -1,7 +1,8 @@
 <html>
 <head>
   <title>Test Vuejs</title>
-  <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/select2.css">
 </head>
 <body>
   <div class="container">
@@ -21,14 +22,16 @@
               {{ $index +1 }}
             </td>
             <td>
-              <select v-model="row.selectedCategory" id="category">
-                <option v-for="category in categories" v-bind:value="category.id">
-                  {{ category.name }}
+              <select v-select="row.selectedCategory" id="category" style="width: 300px; height: 1em;">
+				<option></option>
+                <option v-for="item in categories" v-bind:value="item.id">
+                  {{ item.name }}
                 </option>
               </select>
             </td>
             <td>
-              <select v-model="row.selectedSubCategory" id="subcategory">
+              <select v-select="row.selectedSubCategory" id="subcategory" style="width: 300px; height: 1em;">
+				<option></option>
                 <option v-for="item in subcategories | filterBy row.selectedCategory in 'category_id'" v-bind:value="item.id">
                   {{ item.name }}
                 </option>
@@ -41,18 +44,45 @@
           </tr>
         </tbody>
       </table>
-      <button @click="postData()">SUBMIT DATA</button>
-      <pre>{{ $data | json }}</pre>
-      <pre></pre>
+      <button class="btn btn-success" @click="postData()">SUBMIT DATA</button>
+      <pre>{{ $data.rows | json }}</pre>
     </div>
   </div>
 
   <!--javascript-->
-  <script src="jquery.min.js" type="text/javascript"></script>
-  <script src="vue.js" type="text/javascript"></script>
-  <script src="vue-resource.js" type="text/javascript"></script>
+  <script src="assets/jquery.min.js" type="text/javascript"></script>
+  <script src="assets/select2.full.min.js" type="text/javascript"></script>
+  <script src="assets/vue.js" type="text/javascript"></script>
+  <script src="assets/vue-resource.js" type="text/javascript"></script>
 
   <script>
+  Vue.directive('select', {
+  twoWay: true,
+  priority: 1000,
+
+  params: ['options'],
+
+  bind: function() {
+    var self = this
+    $(this.el)
+    .select2({
+      data: this.params.options, placeholder: "Choose"
+    })
+    .on('change', function() {
+      self.set(this.value)
+    })
+	.on('select2:opening', function() {
+      self.set(this.value)
+    })
+  },
+  update: function(value) {
+    $(this.el).val(value).trigger('change')
+  },
+  unbind: function() {
+    $(this.el).off().select2('destroy')
+  }
+});
+  
   var vm = new Vue({
     el: '#app',
     data: {
@@ -77,13 +107,13 @@
       },
       initCategories: function() {
         // GET /someUrl
-        this.$http.get('get_categories.php').then((response) => {
+        this.$http.get('json/get_categories.php').then((response) => {
           // success callback
           this.$set('categories', response.data.categories)
         }, (response) => {
           // error callback
         });
-        this.$http.get('get_sub_categories.php').then((response) => {
+        this.$http.get('json/get_sub_categories.php').then((response) => {
           // success callback
           this.$set('subcategories', response.data.subcategories)
         }, (response) => {
@@ -94,11 +124,14 @@
         $.ajax({
           context: this,
           type: "POST",
-          data: '{ "csc": '+JSON.stringify(this.rows)+', "sender": [{"nama" : "Admin"}]}',
+          data: '{ "rows": '+JSON.stringify(this.rows)+', "sender": [{"nama" : "Admin"}]}',
 		  success: function(jsonData) {
-			alert(jsonData.message+', code: '+jsonData.status_code);
+			alert('Status: ' + jsonData.message + ', code: ' + jsonData.status_code);
 		  },
-          url: "hasil.php"
+			error: function(jsonData, textStatus, errorThrown) { 
+				alert('Status: ' + textStatus + ', "' + errorThrown + '"' + ', code: ' + jsonData.status); 
+			}, 
+			url: "action/store_dropdown_depedency.php"
         });
       }
     }

@@ -1,0 +1,4 @@
+5;Something;55.2;10
+2;Something else;1255.2;20
+SENDER
+Admin

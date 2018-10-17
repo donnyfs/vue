@@ -1,9 +1,9 @@
 <?php
 $json = file_get_contents('php://input');
 $jsond = json_decode($json);
-$file = fopen("hasil.txt","w");
+$file = fopen("dropdown_depedency.txt","w");
 $isi="";
-foreach($jsond->csc as $o)
+foreach($jsond->rows as $o)
 {
 	$c=$o->selectedCategory;
 	$sc=$o->selectedSubCategory;
